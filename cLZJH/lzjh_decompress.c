@@ -310,7 +310,7 @@ void handle_codeword(DSELF *self, STRUCTRESULT *result_decompress, unsigned int 
             }
 
             // the string represented by the string_collection is a double character of the ordinal
-            new_string_collection(self, result_decompress->len - 1, 2);
+            new_string_collection(self, result_decompress->len - 2, 2);
         }
         else if ((unsigned int) self->flag_pre_code == 1)
         {

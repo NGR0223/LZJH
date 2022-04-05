@@ -439,7 +439,7 @@ class LZJHDecoder:
                 for i in range(2):
                     self.history.append('{:0>8}'.format(string_pre_ordinal))
                     self.index_history += 1
-                self.list_string_collection.append(self.new_string_collection(self.index_history - 1, 2))
+                self.list_string_collection.append(self.new_string_collection(self.index_history - 2, 2))
             elif self.flag_pre_code == 1:  # previous code is a codeword
                 string_collection_pre_codeword = self.search_string_collection_by_codeword(
                     int(self.string_message[self.index_string_message + self.params[1][1] + 2:
