@@ -15,7 +15,7 @@ def write_file_binary(file_path, data):
 
 
 if __name__ == '__main__':
-    with open('C://Users//ngr02//Desktop//LZJH//message.txt', mode='rb') as f:
+    with open('message.txt', mode='rb') as f:
         stringBuffer = f.read()
     listData = ['{:0>8}'.format(bin(int(stringBuffer[i * 2:i * 2 + 2].decode('utf-8'), 16))[2:]) for i in
                 range(int(len(stringBuffer) / 2))]

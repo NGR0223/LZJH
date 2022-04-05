@@ -67,7 +67,8 @@ void decode(STRUCTRESULT *result_decompress)
             {
                 handle_ordinal(&self, result_decompress);
                 self.flag_pre_code = 0;
-            } else
+            }
+            else
             {
                 // the first bit is one(1), so the code is a code(codeword or control code)
                 cur_code = get_code(&self, self.params[1][1], self.index_message_compressed);
@@ -78,13 +79,15 @@ void decode(STRUCTRESULT *result_decompress)
                     handle_control_code(&self, cur_code);
                     self.flag_first_two_code = self.flag_pre_code;
                     self.flag_pre_code = cur_code == 1 ? 3 : 4; // to distinguish the two control codes
-                } else
+                }
+                else
                 {
                     handle_codeword(&self, result_decompress, cur_code);
                     self.flag_pre_code = 1;
                 }
             }
-        } else
+        }
+        else
         {
             // if the first code has been handled, the remaining codes depend on the flag of previous code to decide how to handle them
             // see the Chapter 6.6.3(P15) of the file(V.44 Data Compression Procedures) for specific rules
@@ -101,12 +104,14 @@ void decode(STRUCTRESULT *result_decompress)
                         handle_control_code(&self, cur_code);
                         self.flag_first_two_code = self.flag_pre_code;
                         self.flag_pre_code = cur_code == 1 ? 3 : 4; // to distinguish the two control codes
-                    } else
+                    }
+                    else
                     {
                         handle_codeword(&self, result_decompress, cur_code);
                         self.flag_pre_code = 1;
                     }
-                } else
+                }
+                else
                 {
                     self.index_message_compressed--;
                     // the current code is an ordinal or a string-extension length
@@ -114,13 +119,15 @@ void decode(STRUCTRESULT *result_decompress)
                     {
                         handle_string_extension_length(&self, result_decompress);
                         self.flag_pre_code = 2;
-                    } else
+                    }
+                    else
                     {
                         handle_ordinal(&self, result_decompress);
                         self.flag_pre_code = 0;
                     }
                 }
-            } else // the previous code is other codes
+            }
+            else // the previous code is other codes
             {
                 // the current code is a codeword or a control code
                 if (self.message_compressed[self.index_message_compressed] == 1)
@@ -132,12 +139,14 @@ void decode(STRUCTRESULT *result_decompress)
                         handle_control_code(&self, cur_code);
                         self.flag_first_two_code = self.flag_pre_code;
                         self.flag_pre_code = cur_code == 1 ? 3 : 4; // to distinguish the two control codes
-                    } else
+                    }
+                    else
                     {
                         handle_codeword(&self, result_decompress, cur_code);
                         self.flag_pre_code = 1;
                     }
-                } else // the current code is an ordinal
+                }
+                else // the current code is an ordinal
                 {
                     handle_ordinal(&self, result_decompress);
                     self.flag_pre_code = 0;
@@ -194,7 +203,8 @@ void handle_ordinal(DSELF *self, STRUCTRESULT *result_decompress)
     {
         // the string represented by the new string_collection is the previous ordinal and the current ordinal
         new_string_collection(self, result_decompress->len - 1, 2);
-    } else if ((unsigned int) self->flag_pre_code == 1) // previous code is a codeword
+    }
+    else if ((unsigned int) self->flag_pre_code == 1) // previous code is a codeword
     {
         // get the previous codeword and the string_collection with it
         pre_codeword = get_code(self, self->params[1][1],
@@ -204,12 +214,14 @@ void handle_ordinal(DSELF *self, STRUCTRESULT *result_decompress)
 
         // the string represented by the new string_collection is the string of the previous codeword and the current ordinal
         new_string_collection(self, result_decompress->len - 1, length_pre_string + 1);
-    } else if ((unsigned int) self->flag_pre_code == 4)
+    }
+    else if ((unsigned int) self->flag_pre_code == 4)
     {
         if ((unsigned int) self->flag_first_two_code == 0)
         {
             new_string_collection(self, result_decompress->len - 1, 2);
-        } else if ((unsigned int) self->flag_first_two_code == 1)
+        }
+        else if ((unsigned int) self->flag_first_two_code == 1)
         {
             pre_codeword = get_code(self, self->params[1][1],
                                     (unsigned int) self->index_message_compressed + 2 + 2 * self->params[1][1]);
@@ -234,8 +246,8 @@ void handle_codeword(DSELF *self, STRUCTRESULT *result_decompress, unsigned int 
     STRINGCOLLECTION cur_string_collection = {0, 0, 0}, pre_string_collection = {0, 0, 0};
     unsigned int first_char_pos_pre_string = 0, codeword_pre_string = 0, pre_ordinal = 0;
 
-    // if current codeword is less than the count_codeword, which means the string_collection with the codeword has been created
-    if ((unsigned int) cur_code < self->count_codeword)
+    // if current codeword is less than the C1, which means the string_collection with the codeword has been created
+    if ((unsigned int) cur_code < self->params[1][0])
     {
         // get the string_collection with current codeword and update decompress result with the string represented by current codeword
         cur_string_collection = search_string_collection_by_codeword(self, cur_code);
@@ -250,7 +262,8 @@ void handle_codeword(DSELF *self, STRUCTRESULT *result_decompress, unsigned int 
         {
             // previous code is an ordinal, the string that the string_collection should be the ordinal and the first character of the current codeword
             new_string_collection(self, result_decompress->len - cur_string_collection.string_length, 2);
-        } else if ((unsigned int) self->flag_pre_code == 1)
+        }
+        else if ((unsigned int) self->flag_pre_code == 1)
         {
             // the previous code is a codeword
             codeword_pre_string = get_code(self, self->params[1][1],
@@ -261,12 +274,14 @@ void handle_codeword(DSELF *self, STRUCTRESULT *result_decompress, unsigned int 
             // the string should be the string of previous codeword and the first character of the current codeword
             new_string_collection(self, result_decompress->len - cur_string_collection.string_length,
                                   (unsigned int) pre_string_collection.string_length + 1);
-        } else if ((unsigned int) self->flag_pre_code == 4) // if the previous code is the SETUP code
+        }
+        else if ((unsigned int) self->flag_pre_code == 4) // if the previous code is the SETUP code
         {
             if ((unsigned int) self->flag_first_two_code == 0)
             {
                 new_string_collection(self, result_decompress->len - cur_string_collection.string_length, 2);
-            } else if ((unsigned int) self->flag_first_two_code == 1)
+            }
+            else if ((unsigned int) self->flag_first_two_code == 1)
             {
                 // In this case, the current codeword immediately follows the codeword SETUP control code, and the codeword SETUP control code follows the other codeword.
                 codeword_pre_string = get_code(self, self->params[1][1] - 1,
@@ -279,8 +294,8 @@ void handle_codeword(DSELF *self, STRUCTRESULT *result_decompress, unsigned int 
             }
         }
     }
-        // current code is equal to the count_codeword, which means the string_collection with the codeword is not created yet
-    else if ((unsigned int) cur_code == self->count_codeword)
+        // current code is equal to the C1, which means the string_collection with the codeword is not created yet
+    else if ((unsigned int) cur_code == self->params[1][0])
     {
         // the previous code is an ordinal
         if ((unsigned int) self->flag_pre_code == 0)
@@ -296,7 +311,8 @@ void handle_codeword(DSELF *self, STRUCTRESULT *result_decompress, unsigned int 
 
             // the string represented by the string_collection is a double character of the ordinal
             new_string_collection(self, result_decompress->len - 1, 2);
-        } else if ((unsigned int) self->flag_pre_code == 1)
+        }
+        else if ((unsigned int) self->flag_pre_code == 1)
         {
             // get previous codeword and the string_collection with it
             codeword_pre_string = get_code(self, self->params[1][1],
@@ -365,13 +381,15 @@ void handle_control_code(DSELF *self, unsigned int cur_code)
         unsigned int bit_decoded = (unsigned int) self->len_message_compressed - self->index_message_compressed - 1;
         self->index_message_compressed = bit_decoded % 8 == 0 ? self->index_message_compressed : bit_decoded % 8 - 8 +
                                                                                                  self->index_message_compressed;
-    } else if (cur_code == 2) // SETUP
+    }
+    else if (cur_code == 2) // SETUP
     {
         // if the bit after current code is zero(0), the SETUP control code is transferred for the param that controls the length of ordinal, otherwise it is for param for codeword
         if (self->message_compressed[self->index_message_compressed] == 0) // next code is an ordinal
         {
             self->params[1][4]++;
-        } else // next code is a codeword
+        }
+        else // next code is a codeword
         {
             self->params[1][1]++;
             self->params[1][2] *= 2;
@@ -395,10 +413,10 @@ void handle_control_code(DSELF *self, unsigned int cur_code)
  */
 void new_string_collection(DSELF *self, unsigned int last_char_pos, unsigned int string_length)
 {
-    STRINGCOLLECTION tmp_string_collection = {last_char_pos, self->count_codeword, string_length};
+    STRINGCOLLECTION tmp_string_collection = {last_char_pos, self->params[1][0], string_length};
     self->array_string_collection[self->count_string_collection] = tmp_string_collection;
 
-    self->count_codeword++;
+    self->params[1][0]++;
     self->count_string_collection++;
 }
 
@@ -441,7 +459,8 @@ unsigned int transfer_string_extension_length(DSELF *self)
         // the string-extension-length = 1
         value = 0x00010000;
         value += 1;
-    } else
+    }
+    else
     {
         // move the index forward two bits
         self->index_message_compressed -= 2;
@@ -453,7 +472,8 @@ unsigned int transfer_string_extension_length(DSELF *self)
             // the string-extension-length in [2, 4]
             value = 0x00030000;
             value += get_code(self, 2, 2 + (unsigned int) self->index_message_compressed) + 1;
-        } else
+        }
+        else
         {
             // move the index forward four bits
             self->index_message_compressed -= 4;
@@ -464,7 +484,8 @@ unsigned int transfer_string_extension_length(DSELF *self)
                 // the string-extension-length in [5, 12]
                 value = 0x00070000;
                 value += get_code(self, 3, 3 + (unsigned int) self->index_message_compressed) + 5;
-            } else
+            }
+            else
             {
                 // according to the param N7 to handle the string-extension length
                 // the string-extension-length in [13, 255]
@@ -473,17 +494,20 @@ unsigned int transfer_string_extension_length(DSELF *self)
                     self->index_message_compressed -= 2;
                     value = 0x00090000;
                     value += get_code(self, 5, 5 + (unsigned int) self->index_message_compressed) + 13;
-                } else if (46 < self->params[0][6] && self->params[0][6] <= 78)
+                }
+                else if (46 < self->params[0][6] && self->params[0][6] <= 78)
                 {
                     self->index_message_compressed -= 3;
                     value = 0x000A0000;
                     value += get_code(self, 6, 6 + (unsigned int) self->index_message_compressed) + 13;
-                } else if (78 < self->params[0][6] && self->params[0][6] <= 142)
+                }
+                else if (78 < self->params[0][6] && self->params[0][6] <= 142)
                 {
                     self->index_message_compressed -= 4;
                     value = 0x000B0000;
                     value += get_code(self, 7, 7 + (unsigned int) self->index_message_compressed) + 13;
-                } else if (142 < self->params[0][6] && self->params[0][6] <= 255)
+                }
+                else if (142 < self->params[0][6] && self->params[0][6] <= 255)
                 {
                     self->index_message_compressed -= 5;
                     value = 0x000C0000;

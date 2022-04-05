@@ -59,12 +59,11 @@ class LZJHEncoder:
         self.message = message
         self.len_message = len(message)
         self.index_message = 0
-        self.count_codeword = 4
 
     def encode(self):
         self.len_message = len(self.message)
         self.index_message = 0
-        self.count_codeword = 4
+        self.params[1][0] = 4
         while self.index_message < self.len_message:
             cur_char = self.message[self.index_message]
             ordinal_cur_char = int(cur_char, 2)
@@ -93,15 +92,15 @@ class LZJHEncoder:
                         bin(int(self.message[self.index_message - 1], 2))[2:], self.params[1][4])
                     if self.index_message < self.len_message:
                         # 将该节点加入子节点列表
-                        tmp_node_data = {'codeword': self.count_codeword, 'first_char_pos': self.index_message,
+                        tmp_node_data = {'codeword': self.params[1][0], 'first_char_pos': self.index_message,
                                          'seg_length': 1, 'down_index': 0, 'side_index': 0}
                         tmp_node_children_list = []
                         tmp_node = Node(self.message[self.index_message], tmp_node_data, tmp_node_children_list)
                         for root_child in self.root_array[int(self.message[self.index_message - 1], 2)] \
                                 .root_node.children:
-                            root_child.data['side_index'] = self.count_codeword
+                            root_child.data['side_index'] = self.params[1][0]
                         self.root_array[int(self.message[self.index_message - 1], 2)].root_node.add(tmp_node)
-                        self.count_codeword += 1
+                        self.params[1][0] += 1
                         self.check_codeword_size()
                 else:
                     yield 'codeword' + str(
@@ -117,15 +116,15 @@ class LZJHEncoder:
 
     def new_character(self, ordinal_cur_char):
         # 更新root array
-        self.root_array[ordinal_cur_char].root_node.data['down_index'] = self.count_codeword
+        self.root_array[ordinal_cur_char].root_node.data['down_index'] = self.params[1][0]
 
         # 下一个输入追加到根节点之后
         if self.index_message < self.len_message - 1:
             self.root_array[ordinal_cur_char].root_node.add(Node(self.message[self.index_message],
-                                                                 {'codeword': self.count_codeword,
+                                                                 {'codeword': self.params[1][0],
                                                                   'first_char_pos': self.index_message, 'seg_length': 1,
                                                                   'down_index': 0, 'side_index': 0}, []))
-            self.count_codeword += 1
+            self.params[1][0] += 1
             self.check_codeword_size()
 
     def match_longest_string(self, longest_string):
@@ -144,24 +143,24 @@ class LZJHEncoder:
             if self.index_message == self.len_message:
                 break
 
-        last_node_matched.data['down_index'] = self.count_codeword
+        last_node_matched.data['down_index'] = self.params[1][0]
         if len_string_seg != 0:  # 拓展了部分字符串
             # 将拓展的字符串加入到最后匹配到的节点的子节点列表中
             tmp_node = Node(''.join(self.message[history_pos - len_string_seg:history_pos]),
-                            {'codeword': self.count_codeword, 'first_char_pos': self.index_message - len_string_seg,
+                            {'codeword': self.params[1][0], 'first_char_pos': self.index_message - len_string_seg,
                              'seg_length': len_string_seg, 'down_index': 0, 'side_index': 0}, [])
             last_node_matched.add(tmp_node)
         else:  # 未拓展
             next_char_node = Node(self.message[self.index_message],
-                                  {'codeword': self.count_codeword, 'first_char_pos': self.index_message,
+                                  {'codeword': self.params[1][0], 'first_char_pos': self.index_message,
                                    'seg_length': 1, 'down_index': 0, 'side_index': 0}, [])
             last_node_matched.add(next_char_node)
-        self.count_codeword += 1
+        self.params[1][0] += 1
         self.check_codeword_size()
         return self.message[history_pos - len_string_seg:history_pos], len_string_seg
 
     def check_codeword_size(self):
-        if self.count_codeword == 128:
+        if self.params[1][0] == 128:
             self.params[1][1] = 9
 
 
@@ -172,7 +171,7 @@ class LZJHDecoder:
         self.index_history = 0
         self.history = []
         self.list_string_collection = []
-        self.count_codeword = 4
+        self.params[1][0] = 4
 
     def decode(self):
         # 遍历编码结果，恢复原始数据
@@ -197,7 +196,7 @@ class LZJHDecoder:
                     flag_pre_code = 0
                 elif len(encode_result[1]) != self.params[1][4]:  # codeword
                     cur_codeword = int(encode_result[1], 2)
-                    if cur_codeword < self.count_codeword:  # the codeword received is less than C1
+                    if cur_codeword < self.params[1][0]:  # the codeword received is less than C1
                         string_collection_of_codeword = self.search_string_collection_by_codeword(cur_codeword)
                         length_cur_string = string_collection_of_codeword['string_length']
                         last_char_pos_pre_string = string_collection_of_codeword['last_char_pos']
@@ -218,7 +217,7 @@ class LZJHDecoder:
                                                            length_pre_string + 1))
                         elif flag_pre_code == 2:
                             pass
-                    elif cur_codeword == self.count_codeword:
+                    elif cur_codeword == self.params[1][0]:
                         if flag_pre_code == 0:  # previous encode result is an ordinal
                             pre_char = self.list_encode_result[index_list_encode_result - 1][1]
                             self.history.append(pre_char)
@@ -257,9 +256,9 @@ class LZJHDecoder:
         return self.history
 
     def new_string_collection(self, last_char_pos, string_length):
-        tmp_dict = {'codeword': self.count_codeword, 'last_char_pos': last_char_pos, 'string_length': string_length}
-        self.count_codeword += 1
-        if self.count_codeword == 128:  # 超出7比特可表示范围，拓展到9比特
+        tmp_dict = {'codeword': self.params[1][0], 'last_char_pos': last_char_pos, 'string_length': string_length}
+        self.params[1][0] += 1
+        if self.params[1][0] == 128:  # 超出7比特可表示范围，拓展到9比特
             self.params[1][1] = 9
 
         return tmp_dict

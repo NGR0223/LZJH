@@ -46,7 +46,7 @@ def write_encode_result_to_file(list_encode_result):
             if cur_bin != '':
                 f_obj.write('{:0>2}'.format(hex(int(cur_bin, 2))[2:].upper()) + ' ' + cur_bin + '\n')
 
-    with open('messageCompressResult.txt', mode='w') as f_obj:
+    with open('messageCompressed.txt', mode='w') as f_obj:
         for iser in range(length_string_encode_result_padded):
             cur_bin = string_encode_result_padded[length_string_encode_result_padded * 8 - 8 - 8 * iser:
                                                   length_string_encode_result_padded * 8 - 8 * iser]

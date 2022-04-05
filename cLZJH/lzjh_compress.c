@@ -33,7 +33,7 @@ void encode(STRUCTRESULT *result_compress)
 
     // init data structure and other variables
     CSELF self = {{256, {0}}, {{10, 1024, 8, 256, 4, 0, 255, 3072},
-                               {4, 6, 64, 0, 7}}, NULL, struct_content.len / 2, 0, 4, 15};
+                               {4, 6, 64, 0, 7}}, NULL, struct_content.len / 2, 0, 15};
     // init the root_array
     for (int i = 0; i < 256; ++i)
     {
@@ -113,10 +113,10 @@ void encode(STRUCTRESULT *result_compress)
                 {
                     NODE *tmp_node = (NODE *) calloc(1, sizeof(NODE));
 
-                    init_node(tmp_node, self.count_codeword, self.index_message, 1);
+                    init_node(tmp_node, self.params[1][0], self.index_message, 1);
                     add_child(&self.array_node.arr_node[self.message[(unsigned int) self.index_message - 1]],
                               tmp_node, &self.array_node);
-                    self.count_codeword++;
+                    self.params[1][0]++;
 
                     free(tmp_node);
                     tmp_node = NULL;
@@ -282,11 +282,11 @@ void new_character(unsigned char cur_char, CSELF *self)
     {
         // add the next character of the new character to the root_array[cur_char]'s child
         NODE *tmp_node = (NODE *) calloc(1, sizeof(NODE));
-        init_node(tmp_node, self->count_codeword, self->index_message, 1);
+        init_node(tmp_node, self->params[1][0], self->index_message, 1);
         add_child(&self->array_node.arr_node[cur_char], tmp_node, &self->array_node);
 
-        // update the count_codeword
-        self->count_codeword++;
+        // update the params[1][0
+        self->params[1][0]++;
 
         free(tmp_node);
         tmp_node = NULL;
@@ -337,16 +337,16 @@ unsigned int extend_string_segment(CSELF *self, NODE *node_last_matched)
     // if the string has been extended
     if (len_string_seg != 0)
     {
-        init_node(tmp_node, self->count_codeword, (unsigned int) self->index_message - len_string_seg, len_string_seg);
+        init_node(tmp_node, self->params[1][0], (unsigned int) self->index_message - len_string_seg, len_string_seg);
         add_child(node_last_matched, tmp_node, &self->array_node);
     }
     else
     {
         // add the next character to the list of children of the node last matched
-        init_node(tmp_node, self->count_codeword, self->index_message, 1);
+        init_node(tmp_node, self->params[1][0], self->index_message, 1);
         add_child(node_last_matched, tmp_node, &self->array_node);
     }
-    self->count_codeword++;
+    self->params[1][0]++;
 
     free(tmp_node);
     tmp_node = NULL;

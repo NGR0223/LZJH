@@ -28,7 +28,6 @@ typedef struct string_collection
  *      index_message_compressed: the index of the message_compressed
  *      len_message_compressed: the length of the message_compressed
  *      count_string_collection: the next available index of the array of the struct of the string collection
- *      count_codeword: the next available codeword
  *      flag_pre_code: the flag that records the type of the previous code
  *                     value --- type
  *                         0 --- ordinal
@@ -45,7 +44,6 @@ typedef struct dself
     unsigned int index_message_compressed: 16;
     unsigned int len_message_compressed: 16;
     unsigned int count_string_collection: 10;
-    unsigned int count_codeword: 11;
     unsigned int flag_pre_code: 3;
     unsigned int flag_first_two_code: 3;
 } DSELF;

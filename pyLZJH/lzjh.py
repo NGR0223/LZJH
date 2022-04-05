@@ -59,7 +59,6 @@ class LZJHEncoder:
         self.message = message
         self.len_message = len(message)
         self.index_message = 0
-        self.count_codeword = 4
         self.flag_pre_code = -1
 
     def encode(self):
@@ -105,14 +104,14 @@ class LZJHEncoder:
                     self.flag_pre_code = 0
                     if self.index_message < self.len_message:
                         # 将下一字节作为节点加入子节点列表
-                        tmp_node_data = {'codeword': self.count_codeword, 'first_char_pos': self.index_message,
+                        tmp_node_data = {'codeword': self.params[1][0], 'first_char_pos': self.index_message,
                                          'seg_length': 1, 'down_index': 0, 'side_index': 0}
                         tmp_node = Node(self.message[self.index_message], tmp_node_data, [])
                         for root_child in self.root_array[int(self.message[self.index_message - 1], 2)] \
                                 .root_node.children:
-                            root_child.data['side_index'] = self.count_codeword
+                            root_child.data['side_index'] = self.params[1][0]
                         self.root_array[int(self.message[self.index_message - 1], 2)].root_node.add(tmp_node)
-                        self.count_codeword += 1
+                        self.params[1][0] += 1
                 else:
                     # 检查当前codeword二进制长度是否大于C2
                     if len(bin(list_match_result[-2][0].data['codeword'])) > self.params[1][1] + 2:
@@ -140,15 +139,15 @@ class LZJHEncoder:
 
     def new_character(self, ordinal_cur_char):
         # 更新root array
-        self.root_array[ordinal_cur_char].root_node.data['down_index'] = self.count_codeword
+        self.root_array[ordinal_cur_char].root_node.data['down_index'] = self.params[1][0]
 
         # 下一个输入追加到根节点之后
         if self.index_message < self.len_message - 1:
             self.root_array[ordinal_cur_char].root_node.add(Node(self.message[self.index_message],
-                                                                 {'codeword': self.count_codeword,
+                                                                 {'codeword': self.params[1][0],
                                                                   'first_char_pos': self.index_message, 'seg_length': 1,
                                                                   'down_index': 0, 'side_index': 0}, []))
-            self.count_codeword += 1
+            self.params[1][0] += 1
 
     def match_longest_string(self, longest_string):
         return self.root_array[int(longest_string[0], 2)].match_node_with_longest_string(longest_string)
@@ -166,19 +165,19 @@ class LZJHEncoder:
             if self.index_message == self.len_message or len_string_seg == 254:
                 break
 
-        last_node_matched.data['down_index'] = self.count_codeword
+        last_node_matched.data['down_index'] = self.params[1][0]
         if len_string_seg != 0:  # 拓展了部分字符串
             # 将拓展的字符串加入到最后匹配到的节点的子节点列表中
             tmp_node = Node(''.join(self.message[history_pos - len_string_seg:history_pos]),
-                            {'codeword': self.count_codeword, 'first_char_pos': self.index_message - len_string_seg,
+                            {'codeword': self.params[1][0], 'first_char_pos': self.index_message - len_string_seg,
                              'seg_length': len_string_seg, 'down_index': 0, 'side_index': 0}, [])
             last_node_matched.add(tmp_node)
         else:  # 未拓展
             next_char_node = Node(self.message[self.index_message],
-                                  {'codeword': self.count_codeword, 'first_char_pos': self.index_message,
+                                  {'codeword': self.params[1][0], 'first_char_pos': self.index_message,
                                    'seg_length': 1, 'down_index': 0, 'side_index': 0}, [])
             last_node_matched.add(next_char_node)
-        self.count_codeword += 1
+        self.params[1][0] += 1
         return self.message[history_pos - len_string_seg:history_pos], len_string_seg
 
     def get_prefix(self, flag_cur_code):
@@ -231,7 +230,6 @@ class LZJHDecoder:
         self.index_history = 0
         self.history = []
         self.list_string_collection = []
-        self.count_codeword = 4
         self.flag_pre_code = -1  # -1---(Init REINIT ECM) 0---ordinal 1---codeword 2---string-extension length
         self.flag_first_two_code = -1
 
@@ -312,8 +310,8 @@ class LZJHDecoder:
         return self.history
 
     def new_string_collection(self, last_char_pos, string_length):
-        tmp_dict = {'codeword': self.count_codeword, 'last_char_pos': last_char_pos, 'string_length': string_length}
-        self.count_codeword += 1
+        tmp_dict = {'codeword': self.params[1][0], 'last_char_pos': last_char_pos, 'string_length': string_length}
+        self.params[1][0] += 1
 
         return tmp_dict
 
@@ -402,7 +400,7 @@ class LZJHDecoder:
         self.index_string_message -= 1
 
     def handle_codeword(self, int_cur_codeword):
-        if int_cur_codeword < self.count_codeword:  # current codeword is less than C1
+        if int_cur_codeword < self.params[1][0]:  # current codeword is less than C1
             string_collection_cur_codeword = self.search_string_collection_by_codeword(int_cur_codeword)
             length_cur_string = string_collection_cur_codeword['string_length']
             last_char_pos_pre_string = string_collection_cur_codeword['last_char_pos']
@@ -433,7 +431,7 @@ class LZJHDecoder:
                     length_pre_string = string_collection_pre_codeword['string_length']
                     self.list_string_collection.append(
                         self.new_string_collection(self.index_history - length_cur_string, length_pre_string + 1))
-        elif int_cur_codeword == self.count_codeword:  # current code is equal to C1
+        elif int_cur_codeword == self.params[1][0]:  # current code is equal to C1
             if self.flag_pre_code == 0:  # previous code is an ordinal
                 string_pre_ordinal = self.string_message[
                                      self.index_string_message + self.params[1][1] + 2:

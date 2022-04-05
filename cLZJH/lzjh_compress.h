@@ -20,7 +20,6 @@ typedef struct cself
     unsigned char *message;
     unsigned int len_message: 16;
     unsigned int index_message: 16;
-    unsigned int count_codeword: 14;
     unsigned int flag_pre_code: 4;
 } CSELF;
 
