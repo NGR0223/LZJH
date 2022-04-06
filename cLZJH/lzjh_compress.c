@@ -125,7 +125,7 @@ void encode(STRUCTRESULT *result_compress)
             else
             {
                 // whether the bit of current codeword is more than C2
-                if ((unsigned int) match_result.node_matched->codeword >> self.params[1][1])
+                while((unsigned int) match_result.node_matched->codeword >> self.params[1][1])
                 {
                     // handle the prefix of the codeword SETUP code
                     update_result_compress(result_compress, &self, 3, 0);

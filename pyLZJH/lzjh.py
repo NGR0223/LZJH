@@ -114,7 +114,7 @@ class LZJHEncoder:
                         self.params[1][0] += 1
                 else:
                     # 检查当前codeword二进制长度是否大于C2
-                    if len(bin(list_match_result[-2][0].data['codeword'])) > self.params[1][1] + 2:
+                    while len(bin(list_match_result[-2][0].data['codeword'])) > self.params[1][1] + 2:
                         yield 'controlCodePrefix', self.get_prefix(3)
                         yield 'codewordSetup', "{0:0>{1}}".format(bin(2)[2:], self.params[1][1])
                         self.params[1][1] += 1
