@@ -224,7 +224,7 @@ class LZJHDecoder:
                             self.index_history += 1
                             self.history.append(pre_char)
                             self.index_history += 1
-                            self.list_string_collection.append(self.new_string_collection(self.index_history - 1, 2))
+                            self.list_string_collection.append(self.new_string_collection(self.index_history - 2, 2))
                         elif flag_pre_code == 1:  # previous encode result is a codeword
                             string_collection_of_pre_codeword = self.search_string_collection_by_codeword(
                                 int(self.list_encode_result[index_list_encode_result - 1][1], 2))
