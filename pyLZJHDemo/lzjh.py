@@ -257,6 +257,7 @@ class LZJHDecoder:
 
     def new_string_collection(self, last_char_pos, string_length):
         tmp_dict = {'codeword': self.params[1][0], 'last_char_pos': last_char_pos, 'string_length': string_length}
+        # print(tmp_dict)
         self.params[1][0] += 1
         if self.params[1][0] == 128:  # 超出7比特可表示范围，拓展到9比特
             self.params[1][1] = 9

@@ -137,7 +137,9 @@ void decode(STRUCTRESULT *result_decompress)
                     if (cur_code < 4)
                     {
                         handle_control_code(&self, cur_code);
-                        self.flag_first_two_code = self.flag_pre_code;
+                        self.flag_first_two_code =
+                                (unsigned int) self.flag_pre_code > 2 ? (unsigned int) self.flag_first_two_code
+                                                                      : (unsigned int) self.flag_pre_code;
                         self.flag_pre_code = cur_code == 1 ? 3 : 4; // to distinguish the two control codes
                     }
                     else
@@ -414,6 +416,8 @@ void handle_control_code(DSELF *self, unsigned int cur_code)
 void new_string_collection(DSELF *self, unsigned int last_char_pos, unsigned int string_length)
 {
     STRINGCOLLECTION tmp_string_collection = {last_char_pos, self->params[1][0], string_length};
+//    printf("{'codeword': %d, 'last_char_pos': %d, 'string_length': %d}\n", self->params[1][0], last_char_pos,
+//           string_length);
     self->array_string_collection[self->count_string_collection] = tmp_string_collection;
 
     self->params[1][0]++;
