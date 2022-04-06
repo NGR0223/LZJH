@@ -77,7 +77,9 @@ void decode(STRUCTRESULT *result_decompress)
                 if (cur_code < 4)
                 {
                     handle_control_code(&self, cur_code);
-                    self.flag_first_two_code = self.flag_pre_code;
+                    self.flag_first_two_code =
+                            (unsigned int) self.flag_pre_code > 2 ? (unsigned int) self.flag_first_two_code
+                                                                  : (unsigned int) self.flag_pre_code;
                     self.flag_pre_code = cur_code == 1 ? 3 : 4; // to distinguish the two control codes
                 }
                 else
@@ -102,7 +104,9 @@ void decode(STRUCTRESULT *result_decompress)
                     if (cur_code < 4)
                     {
                         handle_control_code(&self, cur_code);
-                        self.flag_first_two_code = self.flag_pre_code;
+                        self.flag_first_two_code =
+                                (unsigned int) self.flag_pre_code > 2 ? (unsigned int) self.flag_first_two_code
+                                                                      : (unsigned int) self.flag_pre_code;
                         self.flag_pre_code = cur_code == 1 ? 3 : 4; // to distinguish the two control codes
                     }
                     else

@@ -247,10 +247,9 @@ class LZJHDecoder:
                     self.index_string_message -= self.params[1][1] + 1
                     if int_cur_code < 4:  # current code is a control code
                         self.handle_control_code(int_cur_code)
-                        # if int_cur_code == 1:
-                        #     self.flag_pre_code = 3
-                        self.flag_first_two_code = self.flag_pre_code
-                        self.flag_pre_code = 3
+                        self.flag_first_two_code = self.flag_first_two_code if self.flag_pre_code > 2 \
+                            else self.flag_pre_code
+                        self.flag_pre_code = 3 if int_cur_code == 1 else 4
                     else:
                         self.handle_codeword(int_cur_code)
                         self.flag_pre_code = 1
@@ -263,10 +262,9 @@ class LZJHDecoder:
                         self.index_string_message -= self.params[1][1] + 1
                         if int_cur_code < 4:  # current code is a control code
                             self.handle_control_code(int_cur_code)
-                            # if int_cur_code == 1:
-                            #     self.flag_pre_code = 3
-                            self.flag_first_two_code = self.flag_pre_code
-                            self.flag_pre_code = 3
+                            self.flag_first_two_code = self.flag_first_two_code if self.flag_pre_code > 2 \
+                                else self.flag_pre_code
+                            self.flag_pre_code = 3 if int_cur_code == 1 else 4
                         else:
                             self.handle_codeword(int_cur_code)
                             self.flag_pre_code = 1
@@ -297,10 +295,9 @@ class LZJHDecoder:
                         self.index_string_message -= self.params[1][1] + 1
                         if int_cur_code < 4:  # current code is a control code
                             self.handle_control_code(int_cur_code)
-                            # if int_cur_code == 1:
-                            #     self.flag_pre_code = 3
-                            self.flag_first_two_code = self.flag_pre_code
-                            self.flag_pre_code = 3
+                            self.flag_first_two_code = self.flag_first_two_code if self.flag_pre_code > 2 \
+                                else self.flag_pre_code
+                            self.flag_pre_code = 3 if int_cur_code == 1 else 4
                         else:
                             self.handle_codeword(int_cur_code)
                             self.flag_pre_code = 1
