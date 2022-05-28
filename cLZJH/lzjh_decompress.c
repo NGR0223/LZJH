@@ -51,7 +51,7 @@ void decode(STRUCTRESULT *result_decompress)
 
     //Init data structure and other variables
     DSELF self = {{{10, 1024, 8, 256, 4, 0, 255, 3072},
-                   {4, 6, 64, 0, 7}}, NULL, {0}, struct_return.len * 4 - 1, struct_return.len * 4, 0, 4, 7, 7};
+                   {4, 6, 64, 0, 7}}, NULL, {0}, struct_return.len * 4 - 1, struct_return.len * 4, 0, 4, 7};
     self.message_compressed = set_content_to_bit_stream(struct_return);
     free(struct_return.value);
     struct_return.value = NULL;
@@ -337,6 +337,47 @@ void handle_codeword(DSELF *self, STRUCTRESULT *result_decompress, unsigned int 
             // the string represented by the new string_collection is the string represented by the previous codeword and the first character of it
             new_string_collection(self, result_decompress->len - cur_string_collection.string_length,
                                   (unsigned int) pre_string_collection.string_length + 1);
+        }
+        else if ((unsigned int) self->flag_pre_code == 4) // if the previous code is the SETUP code
+        {
+            if ((unsigned int) self->flag_first_two_code == 0)
+            {
+                // get the previous ordinal and add it to decode result twice
+                pre_ordinal = get_code(self, self->params[1][4],
+                                       (unsigned int) self->index_message_compressed + 2 + self->params[1][1] +
+                                       self->params[1][4]);
+                for (int i = 0; i < 2; ++i)
+                {
+                    update_result_decompress(result_decompress, pre_ordinal);
+                }
+                new_string_collection(self, result_decompress->len - cur_string_collection.string_length, 2);
+            }
+            else if ((unsigned int) self->flag_first_two_code == 1)
+            {
+                // get previous codeword and the string_collection with it
+                codeword_pre_string = get_code(self, self->params[1][1],
+                                               (unsigned int) self->index_message_compressed + 2 +
+                                               2 * self->params[1][1]);
+                pre_string_collection = search_string_collection_by_codeword(self, codeword_pre_string);
+                first_char_pos_pre_string =
+                        pre_string_collection.last_char_pos - pre_string_collection.string_length + 1;
+
+                // add the string represented by the previous codeword and the first character of the string of the previous codeword to decode result
+                for (int i = 0; i < (unsigned int) pre_string_collection.string_length; ++i)
+                {
+                    update_result_decompress(result_decompress,
+                                             result_decompress->result[first_char_pos_pre_string + i]);
+                }
+                update_result_decompress(result_decompress, result_decompress->result[first_char_pos_pre_string]);
+                // In this case, the current codeword immediately follows the codeword SETUP control code, and the codeword SETUP control code follows the other codeword.
+                codeword_pre_string = get_code(self, self->params[1][1] - 1,
+                                               (unsigned int) self->index_message_compressed + 1 +
+                                               3 * self->params[1][1]);
+                pre_string_collection = search_string_collection_by_codeword(self, codeword_pre_string);
+
+                new_string_collection(self, result_decompress->len - cur_string_collection.string_length,
+                                      (unsigned int) pre_string_collection.string_length + 1);
+            }
         }
     }
 }

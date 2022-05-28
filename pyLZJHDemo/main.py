@@ -43,16 +43,16 @@ if __name__ == '__main__':
 
     print('Decode result:')
     listDecodeResult = lzjhDecoder.decode()
-    # if listDecodeResult == listData:
-    #     print("True")
-    #     for decodeResult in listDecodeResult:
-    #         print(decodeResult)
-    # else:
-    #     print("False")
-    #     print(listData)
-    #     print(listDecodeResult)
-    #     print(len(listData), len(listDecodeResult))
-    #     for i in range(len(listData)):
-    #         if listData[i] != listDecodeResult[i]:
-    #             print(i)
-    #             break
+    if listDecodeResult == listData:
+        print("True")
+        for decodeResult in listDecodeResult:
+            print(decodeResult)
+    else:
+        print("False")
+        print(listData)
+        print(listDecodeResult)
+        print(len(listData), len(listDecodeResult))
+        for i in range(len(listData)):
+            if listData[i] != listDecodeResult[i]:
+                print(i)
+                break
