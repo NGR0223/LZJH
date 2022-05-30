@@ -5,7 +5,9 @@
 #ifndef CLZJH_GENERAL_H
 #define CLZJH_GENERAL_H
 
+// Half of length of the message at least
 #define RESULT_SIZE 9000
+
 /*!
  * @brief: the struct of the return value of a function in type of a pointer of unsigned char
  *         len: the length of what the pointer points to

@@ -65,40 +65,30 @@ void decode();
  */
 unsigned char *set_content_to_bit_stream(STRUCTRETURN content);
 
-void handle_previous_codeword(unsigned int length_cur_string, unsigned int type_cur_code);
-
 /*!
  * @brief: handle an ordinal
- * @param self: the struct to save data
- * @param result_decompress: the struct to save the encode result
  */
 void handle_ordinal();
 
 /*!
  * @brief:handle a codeword
- * @param self: the struct to save data
- * @param result_decompress: the struct to save the encode result
  * @param cur_code: the code to be handled
  */
 void handle_codeword(unsigned int cur_code);
 
 /*!
  * @brief: handle a string-extension length
- * @param self: the struct to save data
- * @param result_decompress: the struct to save the encode result
  */
 void handle_string_extension_length();
 
 /*!
  * @brief: handle a control code
- * @param self: the struct to save data
  * @param cur_code: the code to be handled
  */
 void handle_control_code(unsigned int cur_code);
 
 /*!
  * @brief: create a new struct of string_collection
- * @param self: the struct to save data
  * @param last_char_pos: the last character position in the decode history
  * @param string_length: the length of the string represented by the string_collection
  */
@@ -106,7 +96,6 @@ void new_string_collection(unsigned int last_char_pos, unsigned int string_lengt
 
 /*!
  * @brief: traverse the array of the string_collection by the codeword searched to get the string_collection whose codeword is equal to the codeword searched
- * @param self: the struct to save data
  * @param codeword_searched: the codeword to be searched
  * @return: the string_collection whose codeword is equal to the codeword searched
  */
@@ -114,21 +103,18 @@ STRINGCOLLECTION search_string_collection_by_codeword(unsigned int codeword_sear
 
 /*!
  * @brief: transfer 1 to up to 12 bits to get the string-extension length in integer
- * @param self: the struct to save data
  * @return: the string-extension length
  */
 unsigned int transfer_string_extension_length();
 
 /*!
  * @brief: save the decode result in the struct of result
- * @param result_decompress: the struct to save result
  * @param result_added: the result to be added
  */
 void update_result_decompress(unsigned char result_added);
 
 /*!
  * @brief: write the decompress result with the decompress result
- * @param result_decompress: the struct to save result
  */
 void write_decompress_result_file();
 
