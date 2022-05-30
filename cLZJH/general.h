@@ -5,6 +5,7 @@
 #ifndef CLZJH_GENERAL_H
 #define CLZJH_GENERAL_H
 
+#define RESULT_SIZE 9000
 /*!
  * @brief: the struct of the return value of a function in type of a pointer of unsigned char
  *         len: the length of what the pointer points to
@@ -26,7 +27,7 @@ typedef struct struct_return
 typedef struct struct_result
 {
     unsigned int len;
-    unsigned char result[9000];
+    unsigned char result[RESULT_SIZE];
 } STRUCTRESULT;
 
 /*!

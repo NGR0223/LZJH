@@ -237,7 +237,7 @@ class LZJHDecoder:
                             self.history.append(self.history[first_char_pos_pre_string])
                             self.index_history += 1
                             self.list_string_collection.append(
-                                self.new_string_collection(self.index_history - 1, length_pre_string + 1))
+                                self.new_string_collection(self.index_history - 2, length_pre_string + 1))
                     flag_pre_code = 1
             else:  # string extension length, only after codeword
                 string_seg_length = encode_result[1]

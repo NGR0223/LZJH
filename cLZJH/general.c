@@ -13,26 +13,23 @@
  */
 STRUCTRETURN read_file_bin(char *path)
 {
-    size_t file_size, result;
-    FILE *fp = NULL;
-    STRUCTRETURN struct_return;
-    struct_return.len = 0;
-    struct_return.value = NULL;
+    STRUCTRETURN struct_return = {0, NULL};
 
     // get the length in bytes of the file
-    if ((fp = fopen(path, "rb")) == NULL)
+    FILE *fp = fopen(path, "rb");
+    if (fp == NULL)
     {
         perror("Fopen error");
 
         return struct_return;
     }
     fseek(fp, 0, SEEK_END);
-    file_size = ftell(fp);
+    size_t file_size = ftell(fp);
     rewind(fp);
 
     // read the content of the file
     struct_return.value = (unsigned char *) calloc(file_size + 1, sizeof(unsigned char));
-    result = fread(struct_return.value, 1, file_size, fp);
+    size_t result = fread(struct_return.value, 1, file_size, fp);
     if (result != file_size)
     {
         perror("Fread error");

@@ -15,7 +15,6 @@ void compress()
     STRUCTRESULT resultCompress = {0, {0}};
 
     encode(&resultCompress);
-    //printf("Length of struct_result: %u\n", resultCompress.len);
 
     // write the file with the result
     write_compress_result_file(resultCompress);
@@ -83,7 +82,6 @@ void encode(STRUCTRESULT *result_compress)
             match_longest_string(self.message, (unsigned int) self.index_message, &match_result, &self.array_node,
                                  self.len_message);
             self.index_message += match_result.len_matched;
-            // printf("Length matched:  %u\n", len_longest_string_matched);
 
             // whether the encoder should process the string-extension procedure
             if (match_result.len_matched == 0) // the string-matching procedure only matched the root node
@@ -125,7 +123,7 @@ void encode(STRUCTRESULT *result_compress)
             else
             {
                 // whether the bit of current codeword is more than C2
-                while((unsigned int) match_result.node_matched->codeword >> self.params[1][1])
+                while ((unsigned int) match_result.node_matched->codeword >> self.params[1][1])
                 {
                     // handle the prefix of the codeword SETUP code
                     update_result_compress(result_compress, &self, 3, 0);
@@ -257,14 +255,7 @@ void handle_prefix(unsigned char prefix, STRUCTRETURN *struct_return)
         // the prefix is '00'(the value of return of the function named get_prefix is three(3), because the prefix '0' is the zero(0)) or '10'
         struct_return->value = (unsigned char *) calloc(2, sizeof(unsigned char));
         struct_return->value[0] = 0;
-        if (prefix == 2)
-        {
-            struct_return->value[1] = 1;
-        }
-        else
-        {
-            struct_return->value[1] = 0;
-        }
+        struct_return->value[1] = prefix == 2 ? 1 : 0;
 
         struct_return->len = 2;
     }
@@ -285,7 +276,7 @@ void new_character(unsigned char cur_char, CSELF *self)
         init_node(tmp_node, self->params[1][0], self->index_message, 1);
         add_child(&self->array_node.arr_node[cur_char], tmp_node, &self->array_node);
 
-        // update the params[1][0
+        // update the params[1][0]
         self->params[1][0]++;
 
         free(tmp_node);
@@ -470,12 +461,6 @@ void update_result_compress(STRUCTRESULT *result_compress, CSELF *self, unsigned
         get_string_extension_length_subfields(code, self->params[0][6], &struct_return);
     }
 
-//    for (int i = 0; i < struct_return.len; ++i)
-//    {
-//        printf("%d", struct_return.value[struct_return.len - 1 - i]);
-//    }
-//    printf("\n");
-
     // update the result
     memcpy(result_compress->result + result_compress->len, struct_return.value, struct_return.len);
     result_compress->len += struct_return.len;
@@ -510,12 +495,6 @@ void write_compress_result_file(STRUCTRESULT result_compress)
                           (result_compress.result[8 * i + 5] << 1) + (result_compress.result[8 * i + 4] << 0));
         fprintf(fp, "%X", (result_compress.result[8 * i + 3] << 3) + (result_compress.result[8 * i + 2] << 2) +
                           (result_compress.result[8 * i + 1] << 1) + (result_compress.result[8 * i + 0] << 0));
-//        printf("%X%X ", tmp2, tmp1);
-//        for (int j = 0; j < 8; ++j)
-//        {
-//            printf("%d", result_compress.result[8 * i + 7 - j]);
-//        }
-//        printf("\n");
     }
 
     fclose(fp);
